@@ -5,9 +5,6 @@ local disableControls = false
 local currentObj
 local currentChairCoords = nil
 
-
-
-
 RegisterCommand('StandUp', function()
 	StandUp()
 end, false)
@@ -76,16 +73,16 @@ function SitDown(object, modelName, data)
 
 	-- Check if the player is already sitting on this chair
     if currentChairCoords == objectCoords then
-        lib.notify({
+        exports.lib.notify({
             title = Config.Visual.error,
             type = 'error'
         })
         return
     end
 
-    lib.callback('ox_sit:getPlace', objectCoords, function(occupied)
+    exports.lib.callback('ox_sit:getPlace', objectCoords, function(occupied)
         if occupied then
-            lib.notify({
+            exports.lib.notify({
                 title = Config.Visual.notification,
                 type = 'info'
             })
