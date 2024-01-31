@@ -3,13 +3,7 @@ local sitting
 local currentScenario
 local disableControls = false
 local currentObj
-local currentChairCoords = nil
-
-RegisterCommand('StandUp', function()
-	StandUp()
-end, false)
-
-RegisterKeyMapping('StandUp', 'Wake up', 'keyboard', Config.Keyboard)
+local currentChairCoords
 
 -- CreateThread: This function creates a new thread to run the specified function
 -- The function initializes the Sitables table and iterates through the Config.Interactables to get the model hash key
@@ -33,10 +27,6 @@ CreateThread(function()
 	})
 end)
 
-
-
-
-
 -- Function to find the nearest interactable sitable object.
 --@return object, distance - The nearest sitable object and its distance
 function GetNearChair()
@@ -57,19 +47,24 @@ function GetNearChair()
     return 0, nil
 end
 
-function SitDown(object, modelName, data)
+-- Function to make the player character sit down on a specified object
+-- @param object The object the player will sit on
+-- @param modelName The name of the model of the object
+-- @param data Additional data related to the object
+function SitDown(object, data)
+    -- Check if the player character has clear line of sight to the object within a radius of 17 units
     if not HasEntityClearLosToEntity(PlayerPedId(), object, 17) then
         return
     end
 
-    disableControls = true
-    currentObj = object
-    FreezeEntityPosition(object, true)
-    PlaceObjectOnGroundProperly(object)
+    disableControls = true  -- Variable used to disable controls during the sitting process
+    currentObj = object  -- Store the current object the player is sitting on
+    FreezeEntityPosition(object, true)  -- Freeze the position of the object
+    PlaceObjectOnGroundProperly(object)  -- Place the object on the ground properly
 
-    local pos = GetEntityCoords(object)
-    local playerPos = GetEntityCoords(PlayerPedId())
-    local objectCoords = vec3(pos.x, pos.y, pos.z)
+    local pos = GetEntityCoords(object)  -- Get the coordinates of the object
+    local playerPos = GetEntityCoords(PlayerPedId())  -- Get the coordinates of the player character
+    local objectCoords = vec3(pos.x, pos.y, pos.z)  -- Create a vector3 object with the coordinates of the object
 
 	-- Check if the player is already sitting on this chair
     if currentChairCoords == objectCoords then
@@ -80,6 +75,7 @@ function SitDown(object, modelName, data)
         return
     end
 
+    -- Check if the place is already occupied
     lib.callback('ox_sit:getPlace', objectCoords, function(occupied)
         if occupied then
             lib.notify({
@@ -88,15 +84,19 @@ function SitDown(object, modelName, data)
             })
         else
 			currentChairCoords = objectCoords
+            -- Trigger the server event to reserve the place for sitting
             TriggerServerEvent('ox_sit:takePlace', objectCoords)
-            currentScenario = data.scenario
+            currentScenario = data.scenario  -- Set the current scenario based on the provided data
+            -- Make the player character perform a sitting scenario at the position of the object
             TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2, GetEntityHeading(object) + 180.0, 0, true, false)
-            Citizen.Wait(2500)
+            Citizen.Wait(2500)  -- Wait for 2500 milliseconds
+            -- Check if the player character is moving
             if GetEntitySpeed(PlayerPedId()) > 0 then
-                ClearPedTasks(PlayerPedId())
+                ClearPedTasks(PlayerPedId())  -- Clear the current task of the player character
+                -- Make the player character perform a sitting scenario at the position of the object
                 TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2, GetEntityHeading(object) + 180.0, 0, true, true)
             end
-            sitting = true
+            sitting = true  -- Set the sitting flag to true
         end
     end, objectCoords)
 end
@@ -128,7 +128,6 @@ function StandUp()
     currentChairCoords = nil
 end
 
-
 -- Add an event handler for the 'ox_sit:sit' event
 RegisterNetEvent("ox_sit:sit")
 AddEventHandler("ox_sit:sit", function()
@@ -150,9 +149,15 @@ AddEventHandler("ox_sit:sit", function()
 		for k,v in pairs(Config.Sitable) do
 			-- If a matching hash is found, sit down on the chair and break the loop
 			if GetHashKey(k) == hash then
-				SitDown(object, k, v)
+				SitDown(object, v)
 				break
 			end
 		end
 	end
 end)
+
+
+RegisterCommand('StandUp', function()
+	StandUp()
+end, false)
+RegisterKeyMapping('StandUp', 'Wake up', 'keyboard', Config.Keyboard)
