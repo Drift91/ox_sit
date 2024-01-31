@@ -10,7 +10,7 @@ This is a rework of the esx_sit script to use only the ox_lib and ox_target syst
 
 ## Installation
 
-- Download the latest release from [here](https://github.com/overextended/ox_lib) or clone the repository.
+- Download the latest release from [here](https://github.com/ControlTheNarrativ3/ox_sit/releases/latest) or clone the repository.
 - Extract the zip file and rename the folder to ox_sit.
 - Copy the folder to your server resources directory.
 - Add `ensure ox_sit` to your server.cfg file.
