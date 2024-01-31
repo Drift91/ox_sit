@@ -73,16 +73,16 @@ function SitDown(object, modelName, data)
 
 	-- Check if the player is already sitting on this chair
     if currentChairCoords == objectCoords then
-        exports.lib.notify({
+        lib.notify({
             title = Config.Visual.error,
             type = 'error'
         })
         return
     end
 
-    exports.lib.callback('ox_sit:getPlace', objectCoords, function(occupied)
+    lib.callback('ox_sit:getPlace', objectCoords, function(occupied)
         if occupied then
-            exports.lib.notify({
+            lib.notify({
                 title = Config.Visual.notification,
                 type = 'info'
             })
