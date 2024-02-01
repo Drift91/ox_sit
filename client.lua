@@ -85,7 +85,7 @@ function SitDown(object, data)
         else
 			currentChairCoords = objectCoords
             -- Trigger the server event to reserve the place for sitting
-            TriggerServerEvent('ox_sit:takePlace', objectCoords)
+            TriggerServerEvent('ox_sit:takePlace', objectCoords, currentObj)
             currentScenario = data.scenario  -- Set the current scenario based on the provided data
             -- Make the player character perform a sitting scenario at the position of the object
             TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2, GetEntityHeading(object) + 180.0, 0, true, false)
