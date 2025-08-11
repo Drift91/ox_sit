@@ -11,20 +11,20 @@ local currentChairCoords
 -- Finally, it calls the addModel function from the ox_target module with the Sitables table and a table containing icon, label, event, and Distance properties
 -- @param {function} func - The function to be executed in the new thread
 CreateThread(function()
-	local Sitables = {} -- Initialize a table to store model hash keys
-	for _,v in pairs(Config.Interactables) do
-		local model = GetHashKey(v) -- Get the model hash key for each item in Config.Interactables
-		table.insert(Sitables, model) -- Add the model hash key to the Sitables table
-	end
-	Wait(100) -- Wait for 100 milliseconds
-	exports.ox_target:addModel(Sitables, { -- Call the addModel function from the ox_target module
-		{
-			icon = Config.Visual.icon, -- The icon property from the Config.Visual table
-			label = Config.Visual.label, -- The label property from the Config.Visual table
-			event = "ox_sit:sit", -- The event property with value "ox_sit:sit"
-			Distance = Config.MaxDistance -- The Distance property from the Config table
-		},
-	})
+    local Sitables = {} -- Initialize a table to store model hash keys
+    for _,v in pairs(Config.Interactables) do
+        local model = GetHashKey(v) -- Get the model hash key for each item in Config.Interactables
+        table.insert(Sitables, model) -- Add the model hash key to the Sitables table
+    end
+    Wait(100) -- Wait for 100 milliseconds
+    exports.ox_target:addModel(Sitables, { -- Call the addModel function from the ox_target module
+        {
+            icon = Config.Visual.icon, -- The icon property from the Config.Visual table
+            label = Config.Visual.label, -- The label property from the Config.Visual table
+            event = "ox_sit:sit", -- The event property with value "ox_sit:sit"
+            Distance = Config.MaxDistance -- The Distance property from the Config table
+        },
+    })
 end)
 
 -- Function to find the nearest interactable sitable object.
@@ -66,7 +66,7 @@ function SitDown(object, data)
     local playerPos = GetEntityCoords(PlayerPedId())  -- Get the coordinates of the player character
     local objectCoords = vec3(pos.x, pos.y, pos.z)  -- Create a vector3 object with the coordinates of the object
 
-	-- Check if the player is already sitting on this chair
+    -- Check if the player is already sitting on this chair
     if currentChairCoords == objectCoords then
         lib.notify({
             title = Config.Visual.error,
@@ -83,7 +83,7 @@ function SitDown(object, data)
                 type = 'info'
             })
         else
-			currentChairCoords = objectCoords
+            currentChairCoords = objectCoords
             -- Trigger the server event to reserve the place for sitting
             TriggerServerEvent('ox_sit:takePlace', objectCoords, currentObj)
             currentScenario = data.scenario  -- Set the current scenario based on the provided data
@@ -131,33 +131,33 @@ end
 -- Add an event handler for the 'ox_sit:sit' event
 RegisterNetEvent("ox_sit:sit")
 AddEventHandler("ox_sit:sit", function()
-	-- Check if the player is already sitting and not in the current scenario, then make the player stand up
-	if sitting and not IsPedUsingScenario(PlayerPedId(), currentScenario) then
-		StandUp()
-	end
-	-- If controls are disabled, then disable the control action for input 37 (E key)
-	if disableControls then
-		DisableControlAction(1, 37, true)
-	end
-	-- Get the nearest chair and its distance
-	local object, distance = GetNearChair()
-	-- If a chair is found within the maximum distance specified in the Config, then attempt to sit down on it
-	if distance and distance < Config.MaxDistance then
-		-- Get the model hash of the chair object
-		local hash = GetEntityModel(object)
-		-- Iterate through the Sitable objects in the Config and find a matching hash for the chair
-		for k,v in pairs(Config.Sitable) do
-			-- If a matching hash is found, sit down on the chair and break the loop
-			if GetHashKey(k) == hash then
-				SitDown(object, v)
-				break
-			end
-		end
-	end
+    -- Check if the player is already sitting and not in the current scenario, then make the player stand up
+    if sitting and not IsPedUsingScenario(PlayerPedId(), currentScenario) then
+        StandUp()
+    end
+    -- If controls are disabled, then disable the control action for input 37 (E key)
+    if disableControls then
+        DisableControlAction(1, 37, true)
+    end
+    -- Get the nearest chair and its distance
+    local object, distance = GetNearChair()
+    -- If a chair is found within the maximum distance specified in the Config, then attempt to sit down on it
+    if distance and distance < Config.MaxDistance then
+        -- Get the model hash of the chair object
+        local hash = GetEntityModel(object)
+        -- Iterate through the Sitable objects in the Config and find a matching hash for the chair
+        for k,v in pairs(Config.Sitable) do
+            -- If a matching hash is found, sit down on the chair and break the loop
+            if GetHashKey(k) == hash then
+                SitDown(object, v)
+                break
+            end
+        end
+    end
 end)
 
 
 RegisterCommand('StandUp', function()
-	StandUp()
+    StandUp()
 end, false)
 RegisterKeyMapping('StandUp', 'Wake up', 'keyboard', Config.Keyboard)
