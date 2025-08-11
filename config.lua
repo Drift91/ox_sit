@@ -1,13 +1,15 @@
 Config = {}
 
 Config.MaxDistance = 2.5
+Config.MustHaveLineOfSight = true
 Config.Debug = false
 
 Config.Visual = {
 	icon = 'fas fa-chair',
 	label = 'sit',
 	notification = 'There is someone in this chair',
-	error = 'You are already sitting here!'
+	error = 'You are already sitting here!',
+	los = 'You can not reach this seat!'
 }
 
 Config.Keyboard = 'x'

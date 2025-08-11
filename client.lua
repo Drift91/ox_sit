@@ -33,7 +33,11 @@ end)
 -- @param data Additional data related to the object
 function SitDown(object, data)
     -- Check if the player character has clear line of sight to the object within a radius of 17 units
-    if not HasEntityClearLosToEntity(PlayerPedId(), object, 17) then
+    if Config.MustHaveLineOfSight and not HasEntityClearLosToEntity(PlayerPedId(), object, 17) then
+        lib.notify({
+            title = Config.Visual.los,
+            type = 'error'
+        })
         return
     end
 
