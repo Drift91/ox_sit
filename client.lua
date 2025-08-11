@@ -27,26 +27,6 @@ CreateThread(function()
     })
 end)
 
--- Function to find the nearest interactable sitable object.
---@return object, distance - The nearest sitable object and its distance
-function GetNearChair()
-    local object, distance
-    local coords = GetEntityCoords(PlayerPedId())
-
-    -- Loop through each interactable object in the configuration
-    for i=1, #Config.Interactables do
-        -- Get the closest object of the specified type
-        object = GetClosestObjectOfType(coords.x, coords.y, coords.z, 3.0, GetHashKey(Config.Interactables[i]), false, false, false)
-        distance = #(coords - GetEntityCoords(object))
-        -- Check if the object is within the maximum distance
-        if distance < Config.MaxDistance then
-            return object, distance
-        end
-    end
-    -- Return nil if no suitable object is found
-    return 0, nil
-end
-
 -- Function to make the player character sit down on a specified object
 -- @param object The object the player will sit on
 -- @param modelName The name of the model of the object
@@ -130,7 +110,8 @@ end
 
 -- Add an event handler for the 'ox_sit:sit' event
 RegisterNetEvent("ox_sit:sit")
-AddEventHandler("ox_sit:sit", function()
+AddEventHandler("ox_sit:sit", function(data)
+    local object, distance = data.entity, data.distance
     -- Check if the player is already sitting and not in the current scenario, then make the player stand up
     if sitting and not IsPedUsingScenario(PlayerPedId(), currentScenario) then
         StandUp()
@@ -139,8 +120,6 @@ AddEventHandler("ox_sit:sit", function()
     if disableControls then
         DisableControlAction(1, 37, true)
     end
-    -- Get the nearest chair and its distance
-    local object, distance = GetNearChair()
     -- If a chair is found within the maximum distance specified in the Config, then attempt to sit down on it
     if distance and distance < Config.MaxDistance then
         -- Get the model hash of the chair object
