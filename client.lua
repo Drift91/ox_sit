@@ -72,13 +72,13 @@ function SitDown(object, data)
             TriggerServerEvent('ox_sit:takePlace', objectCoords, currentObj)
             currentScenario = data.scenario  -- Set the current scenario based on the provided data
             -- Make the player character perform a sitting scenario at the position of the object
-            TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2, GetEntityHeading(object) + 180.0, 0, true, false)
+            TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2 + data.verticalOffset+0.5, GetEntityHeading(object) + 180.0, 0, true, false)
             Citizen.Wait(2500)  -- Wait for 2500 milliseconds
             -- Check if the player character is moving
             if GetEntitySpeed(PlayerPedId()) > 0 then
                 ClearPedTasks(PlayerPedId())  -- Clear the current task of the player character
                 -- Make the player character perform a sitting scenario at the position of the object
-                TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2, GetEntityHeading(object) + 180.0, 0, true, true)
+                TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2 + data.verticalOffset+0.5, GetEntityHeading(object) + 180.0, 0, true, true)
             end
             sitting = true  -- Set the sitting flag to true
         end
