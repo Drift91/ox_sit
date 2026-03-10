@@ -14,5 +14,5 @@ AddEventHandler('ox_sit:leavePlace', function(objectCoords)
 end)
 
 lib.callback.register('ox_sit:getPlace',function(objectCoords)
-    return seatsTaken[objectCoords]
+	return seatsTaken[objectCoords]
 end)

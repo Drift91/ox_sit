@@ -17,7 +17,7 @@ Config.Keyboard = 'x'
 Config.Sitable = {
 	--Only verticalOffset works right now!
 	--all scenarios: pastebin.com/6mrYTdQv
-	
+
 	-- BENCH
 	prop_bench_01a 				= { scenario = 'PROP_HUMAN_SEAT_BENCH', verticalOffset = -0.5, forwardOffset = 0.0, leftOffset = 0.0},
 	prop_bench_01b 				= { scenario = 'PROP_HUMAN_SEAT_BENCH', verticalOffset = -0.5, forwardOffset = 0.0, leftOffset = 0.0},
