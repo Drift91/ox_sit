@@ -30,8 +30,8 @@ end)
 -- Function to make the player character sit down on a specified object
 -- @param object The object the player will sit on
 -- @param modelName The name of the model of the object
--- @param data Additional data related to the object
-function SitDown(object, data)
+-- @param datas Additional data related to the object seats
+function SitDown(object, datas, oxData)
 	-- Check if the player character has clear line of sight to the object within a radius of 17 units
 	if Config.MustHaveLineOfSight and not HasEntityClearLosToEntity_2(PlayerPedId(), object, 17) then
 		lib.notify({
@@ -46,10 +46,9 @@ function SitDown(object, data)
 	FreezeEntityPosition(object, true)  -- Freeze the position of the object
 	PlaceObjectOnGroundProperly(object)  -- Place the object on the ground properly
 
-	local pos = GetEntityCoords(object)  -- Get the coordinates of the object
+	local _, rightVector, _, pos = GetEntityMatrix(object) -- Get the coordinates and matrix of the object
 	local playerPos = GetEntityCoords(PlayerPedId())  -- Get the coordinates of the player character
 	local objectCoords = vec3(pos.x, pos.y, pos.z)  -- Create a vector3 object with the coordinates of the object
-
 	-- Check if the player is already sitting on this chair
 	if currentChairCoords == objectCoords then
 		lib.notify({
@@ -59,26 +58,37 @@ function SitDown(object, data)
 		return
 	end
 
+	-- Use 'leftOffset' and shape test coordinates to select side on benches
+	local data, seatPos; local distCheck = 1000000.0
+	for k,v in pairs(datas) do
+		local _seatPos = objectCoords + (-rightVector * v.leftOffset)
+		local dist = #(oxData.coords - _seatPos)
+
+		if dist < distCheck then
+			distCheck = dist; seatPos = _seatPos; data = v
+		end
+	end
+
 	-- Check if the place is already occupied
-	lib.callback('ox_sit:getPlace', objectCoords, function(occupied)
+	lib.callback('ox_sit:getPlace', seatPos, function(occupied)
 		if occupied then
 			lib.notify({
 				title = Config.Visual.notification,
 				type = 'info'
 			})
 		else
-			currentChairCoords = objectCoords
+			currentChairCoords = seatPos
 			-- Trigger the server event to reserve the place for sitting
-			TriggerServerEvent('ox_sit:takePlace', objectCoords, currentObj)
+			TriggerServerEvent('ox_sit:takePlace', seatPos, currentObj)
 			currentScenario = data.scenario  -- Set the current scenario based on the provided data
 			-- Make the player character perform a sitting scenario at the position of the object
-			TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2 + data.verticalOffset+0.5, GetEntityHeading(object) + 180.0, 0, true, false)
+			TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, seatPos.x, seatPos.y, seatPos.z + (playerPos.z - seatPos.z)/2 + data.verticalOffset+0.5, GetEntityHeading(object) + 180.0, 0, true, false)
 			Citizen.Wait(2500)  -- Wait for 2500 milliseconds
 			-- Check if the player character is moving
 			if GetEntitySpeed(PlayerPedId()) > 0 then
 				ClearPedTasks(PlayerPedId())  -- Clear the current task of the player character
 				-- Make the player character perform a sitting scenario at the position of the object
-				TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, pos.x, pos.y, pos.z + (playerPos.z - pos.z)/2 + data.verticalOffset+0.5, GetEntityHeading(object) + 180.0, 0, true, true)
+				TaskStartScenarioAtPosition(PlayerPedId(), currentScenario, seatPos.x, seatPos.y, seatPos.z + (playerPos.z - seatPos.z)/2 + data.verticalOffset+0.5, GetEntityHeading(object) + 180.0, 0, true, true)
 			end
 			sitting = true  -- Set the sitting flag to true
 		end
@@ -113,7 +123,6 @@ function StandUp()
 end
 
 -- Add an event handler for the 'ox_sit:sit' event
-RegisterNetEvent("ox_sit:sit")
 AddEventHandler("ox_sit:sit", function(data)
 	local object, distance = data.entity, data.distance
 	-- Check if the player is already sitting and not in the current scenario, then make the player stand up
@@ -132,7 +141,7 @@ AddEventHandler("ox_sit:sit", function(data)
 		for k,v in pairs(Config.Sitable) do
 			-- If a matching hash is found, sit down on the chair and break the loop
 			if GetHashKey(k) == hash then
-				SitDown(object, v)
+				SitDown(object, v, data)
 				break
 			end
 		end
